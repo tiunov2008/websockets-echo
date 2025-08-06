@@ -19,7 +19,7 @@ def health_check(connection, request):
 
 
 async def main():
-    port = int(os.environ["PORT"])
+    port = 8000
     async with serve(echo, "", port, process_request=health_check) as server:
         loop = asyncio.get_running_loop()
         loop.add_signal_handler(signal.SIGTERM, server.close)
