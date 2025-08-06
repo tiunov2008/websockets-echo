@@ -18,11 +18,19 @@ def health_check(connection, request):
 
 
 async def main():
-    async with serve(echo, "", 8080, process_request=health_check) as server:
-        loop = asyncio.get_running_loop()
-        loop.add_signal_handler(signal.SIGTERM, server.close)
-        await server.wait_closed()
+    port = 8000
+    async with serve(echo, "", port, process_request=health_check) as server:
+        stop = asyncio.Event()
 
+        def on_stop():
+            stop.set()
+
+        loop = asyncio.get_running_loop()
+        if hasattr(signal, "SIGTERM"):
+            loop.add_signal_handler(signal.SIGTERM, on_stop)
+        loop.add_signal_handler(signal.SIGINT, on_stop)
+
+        await stop.wait()
 
 if __name__ == "__main__":
     asyncio.run(main())
